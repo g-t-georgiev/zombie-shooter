@@ -311,6 +311,14 @@ function spawnEnemies() {
         const enemy = createEnemy({
             x: vSP.x, y: vSP.y
         });
+
+        const dx = player.centerX - enemy.position.x;
+        const dy = player.centerY - enemy.position.y;
+        const angle = Math.atan2(dx, -dy);
+
+        enemy.vx = Math.cos(angle) * enemy.speed;
+        enemy.vy = Math.sin(angle) * enemy.speed;
+
         enemySpawnInterval = SPAWN_INTERVAL;
     }
 
@@ -318,14 +326,8 @@ function spawnEnemies() {
 }
 
 function updateEnemies(dt) {
-    for (const enemy of enemies) {
-        const dx = player.centerX - enemy.position.x;
-        const dy = player.centerY - enemy.position.y;
-        const dist = Math.sqrt((dx * dx) + (dy * dy));
-        const nDx = dx / dist;
-        const nDy = dy / dist;
-        
-        enemy.position.x += nDx * enemy.speed;
-        enemy.position.y += nDy * enemy.speed;
+    for (const enemy of enemies) {        
+        enemy.position.x += enemy.vx;
+        enemy.position.y += enemy.vy;
     }
 }
