@@ -278,11 +278,6 @@ function createEnemy({ x = 0, y = 0, size = 20, speed = 2, color = 0x6a1391, hp 
     enemy.hp = hp;
     enemy.attack = attack;
     enemy.speed = speed;
-
-    const deltaX = player.centerX - enemy.x;
-    const deltaY = player.centerY - enemy.y;
-    enemy.directionAngle = Math.atan2(deltaX, -deltaY);
-
     enemies.push(enemy);
     app.stage.addChild(enemy);
     return enemy;
@@ -324,7 +319,13 @@ function spawnEnemies() {
 
 function updateEnemies(dt) {
     for (const enemy of enemies) {
-        enemy.position.x += enemy.speed * Math.cos(enemy.directionAngle);
-        enemy.position.y += enemy.speed * Math.sin(enemy.directionAngle);
+        const dx = player.centerX - enemy.position.x;
+        const dy = player.centerY - enemy.position.y;
+        const dist = Math.sqrt((dx * dx) + (dy * dy));
+        const nDx = dx / dist;
+        const nDy = dy / dist;
+        
+        enemy.position.x += nDx * enemy.speed;
+        enemy.position.y += nDy * enemy.speed;
     }
 }
