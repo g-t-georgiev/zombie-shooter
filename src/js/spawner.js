@@ -1,8 +1,8 @@
 class Spawner {
 
-    constructor({ factoryFn }) {
+    constructor({ factoryFn, maxSpawnCount = 30 }) {
         const spawnInterval = 1000;
-        this.maxSpawnCount = 30;
+        this.maxSpawnCount = maxSpawnCount;
         this.factoryFn = factoryFn;
         this.spawns = [];
         setInterval(() => {

@@ -1,38 +1,71 @@
-let _app;
-let _player;
-
 class Zombie extends PIXI.Sprite {
+    #app;
+    #stage;
+    #player;
 
-    constructor({ app, player, texture, speed = 2, size = 16 }) {
-        _app = app;
-        _player = player;
+    #attacking = false;
 
-        const r = randomSpawnPoint();
+    constructor({ app, player, texture, speed = 2, size = 16, damage = 1 }) {
+        if (!app) {
+            throw new Error('Missing app reference argument');
+        }
+
+        if (!player) {
+            throw new Error('Missing player reference argument');
+        }
+
+        const r = randomSpawnPoint(app.view.width, app.view.height);
 
         if (!texture) {
             const circle = new PIXI.Graphics();
+            circle.position.set(0, 0);
             circle.beginFill(0xFF0000, 1);
             circle.drawCircle(0, 0, size);
             circle.endFill();
+            
             texture = app.renderer.generateTexture(circle);
+            circle.destroy();
         }
         
         super(texture);
+        this.#app = app;
+        this.#player = player;
+        this.#stage = app.stage;
+
+        this.halfWidth = size;
+        this.halfHeight = size;
         this.width = size * 2;
         this.height = size * 2;
         this.position.set(r.x, r.y);
         this.anchor.set(.5);
         this.speed = speed;
-        _app.stage.addChild(this);
+        this.damage = damage;
+        this.#stage.addChild(this);
+    }
+
+    kill() {
+        this.#stage.removeChild(this);
+        window.clearInterval(this.attackInterval);
+    }
+
+    attack() {
+        if (this.#attacking) return;
+
+        this.#attacking = true;
+        this.#player.takeDamage(this.damage);
+        this.attackInterval = window.setInterval(() => {
+            this.#player.takeDamage(this.damage);
+        }, 500);
     }
 
     update(dt) {
         const e = new Victor(this.position.x, this.position.y);
-        const s = new Victor(_player.position.x, _player.position.y);
+        const s = new Victor(this.#player.position.x, this.#player.position.y);
 
-        if (e.distance(s) < _player.width) {
-            let r = randomSpawnPoint();
-            this.position.set(r.x, r.y);
+        if (e.distance(s) < this.#player.width) {
+            // let r = randomSpawnPoint();
+            // this.position.set(r.x, r.y);
+            this.attack();
         }
 
         const d = s.subtract(e);
@@ -41,29 +74,28 @@ class Zombie extends PIXI.Sprite {
     }
 }
 
-function randomSpawnPoint() {
+function randomSpawnPoint(canvasWidth, canvasHeight) {
     const edge = Math.floor(Math.random() * 4);
     const point = new Victor(0, 0);
-    const canvasSize = _app.screen.width;
     switch (edge) {
         case 0: {
-            point.x = canvasSize * Math.random();
+            point.x = canvasWidth * Math.random();
             point.y = 0;
             break;
         }
         case 1: {
-            point.x = canvasSize;
-            point.y = canvasSize * Math.random();
+            point.x = canvasWidth;
+            point.y = canvasHeight * Math.random();
             break;
         }
         case 2: {
-            point.x = canvasSize * Math.random();
-            point.y = canvasSize;
+            point.x = canvasWidth * Math.random();
+            point.y = canvasHeight;
             break;
         }
         case 3: {
             point.x = 0;
-            point.y = canvasSize * Math.random();
+            point.y = canvasHeight * Math.random();
             break;
         }
         default: {
