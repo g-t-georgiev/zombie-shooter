@@ -4,6 +4,7 @@ import Healthbar from "./healthbar.js";
 class Player extends PIXI.Sprite {
     #app;
     #stage;
+    #view;
 
     constructor({ app, texture, size = 32 }) {
         if (!app) {
@@ -17,11 +18,16 @@ class Player extends PIXI.Sprite {
         super(texture);
         this.#app = app;
         this.#stage = app.stage;
+        this.#view = app.view;
         this.anchor.set(0.5);
         this.position.set(app.screen.width / 2, app.screen.height / 2);
         this.width = this.height = size;
         this.tint = 0xea985d;
+        this.visible = false;
+    }
 
+    init() {
+        this.visible = true;
         this.#stage.addChild(this);
 
         // Health
@@ -29,30 +35,56 @@ class Player extends PIXI.Sprite {
         this.health = this.maxHealth;
         this.dead = false;
 
-        const paddingInline = 20
-        const healthbarWidth = 150;
-        const healthbarHeight = 10;
-        const healthbarX = app.screen.width - healthbarWidth - paddingInline;
-        const healthbarY = 20;
-        this.healthbar = new Healthbar({ 
-            x: healthbarX,
-            y: healthbarY,
-            width: healthbarWidth,
-            height: healthbarHeight
-        });
-        this.healthbar.zIndex = 1;
-        app.stage.addChild(this.healthbar);
-        app.stage.sortableChildren = true;
+        if (!this.healthbar) {
+            const paddingInline = 20
+            const healthbarWidth = 150;
+            const healthbarHeight = 10;
+            const healthbarX = this.#app.screen.width - healthbarWidth - paddingInline;
+            const healthbarY = 20;
+
+            this.healthbar = new Healthbar({ 
+                x: healthbarX,
+                y: healthbarY,
+                width: healthbarWidth,
+                height: healthbarHeight
+            });
+            this.healthbar.zIndex = 1;
+            this.#stage.sortableChildren = true;
+        }
+
+        if (this.healthbar.isEmpty) {
+            this.healthbar.reset();
+        }
+
+        this.healthbar.visible = true;
+        this.#stage.addChild(this.healthbar);
         
         // Shooter
-        this.shooter = new Shooter({ app, player: this });
-        app.view.addEventListener("pointerup", () => {
-            this.shooter.requestGunFire();
-        });
+        if (!this.shooter) {
+            this.shooter = new Shooter({ app: this.#app, player: this });
+            this.fire = () => {
+                this.shooter.requestGunFire();
+            };
+        }
+        
+        this.#view.addEventListener("pointerup", this.fire);
+    }
+
+    destroy() {
+        this.#view.removeEventListener("pointerup", this.fire);
+        this.shooter.destroy();
+
+        this.visible = false;
+        this.#stage.removeChild(this);
+
+        this.healthbar.visible = false;
+        this.#stage.removeChild(this.healthbar);
     }
 
     takeDamage(damage = 0) {
         this.health -= damage;
+        this.health = Math.max(this.health, 0);
+        // console.log(this.health);
         this.healthbar.updateHealthbar(this.health / this.maxHealth);
 
         if (this.health <= 0) {
