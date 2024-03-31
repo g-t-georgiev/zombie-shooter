@@ -40,12 +40,25 @@ class Zombie extends PIXI.Sprite {
         this.anchor.set(.5);
         this.speed = speed;
         this.damage = damage;
+        this.visible = false;
+    }
+
+    init() {
+        this.visible = true;
         this.#stage.addChild(this);
     }
 
-    kill() {
-        this.#stage.removeChild(this);
+    destroy() {
         window.clearInterval(this.attackInterval);
+        this.#attacking = false;
+        this.visible = false;
+        this.#stage.removeChild(this);
+    }
+
+    kill() {
+        window.clearInterval(this.attackInterval);
+        this.#attacking = false;
+        this.#stage.removeChild(this);
     }
 
     attack() {
@@ -54,6 +67,12 @@ class Zombie extends PIXI.Sprite {
         this.#attacking = true;
         this.#player.takeDamage(this.damage);
         this.attackInterval = window.setInterval(() => {
+            if (this.#app.paused) {
+                window.clearInterval(this.attackInterval);
+                this.#attacking = false;
+                return;
+            }
+
             this.#player.takeDamage(this.damage);
         }, 500);
     }
@@ -69,7 +88,7 @@ class Zombie extends PIXI.Sprite {
         }
 
         const d = s.subtract(e);
-        const v = d.normalize().multiplyScalar(this.speed);
+        const v = d.normalize().multiplyScalar(this.speed * dt);
         this.position.set(this.position.x + v.x, this.position.y + v.y);
     }
 }
