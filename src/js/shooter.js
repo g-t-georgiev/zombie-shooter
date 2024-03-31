@@ -18,7 +18,6 @@ class Bullet extends PIXI.Sprite {
             circle.beginFill(0x0000FF, 1);
             circle.drawCircle(0, 0, size);
             circle.endFill();
-
             texture = app.renderer.generateTexture(circle);
             circle.destroy();
         }
@@ -72,6 +71,11 @@ class Shooter {
         this.maxBulletsCount = 3;
     }
 
+    destroy() {
+        this.bullets.forEach(bullet => bullet.destroy?.());
+        this.bullets.length = 0;
+    }
+
     requestGunFire() {
         if (this.#timeout > 0) return;
 
@@ -84,10 +88,12 @@ class Shooter {
             }
         }, 200);
 
-        this.#createBullet();
+        // console.log('requestGunFire', this);
+        this.#createBullet.call(this);
     }
 
     #createBullet() {
+        // console.log('#createBullet', this);
         const bullet = new Bullet({ app: this.#app, player: this.#player, size: this.bulletSize, speed: this.bulletSpeed });
         
         const directionAngle = this.#player.rotation;
@@ -117,8 +123,8 @@ class Shooter {
             }
 
             bullet.position.set(
-                bullet.position.x + bullet.velocity.x,
-                bullet.position.y + bullet.velocity.y
+                bullet.position.x + bullet.velocity.x * dt,
+                bullet.position.y + bullet.velocity.y * dt
             );
         });
     }
