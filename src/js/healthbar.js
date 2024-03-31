@@ -1,5 +1,7 @@
 class Healthbar extends PIXI.Container {
 
+    #empty = false;
+
     constructor({ x, y, width, height }) {
         super();
 
@@ -25,18 +27,34 @@ class Healthbar extends PIXI.Container {
         this.addChild(this.fillRect);
     }
 
+    get isEmpty() {
+        return this.#empty;
+    }
+
+    reset() {
+        if (!this.#empty) return;
+        
+        this.#empty = false;
+        this.#drawHealthLine(this.maxWidth - 2);
+        this.addChild(this.fillRect);
+    }
+
     updateHealthbar(rate) {
         let width = Math.max(rate * (this.maxWidth - 2), 0);
-        let height = this.fixedHeight - 2;
 
         if (width <= 0) {
+            this.#empty = true;
             this.removeChild(this.fillRect);
             return;
         }
 
+        this.#drawHealthLine(width);
+    }
+
+    #drawHealthLine(width) {
         this.fillRect.clear();
         this.fillRect.beginFill(0xb91313, 1);
-        this.fillRect.drawRoundedRect(0, 0, width, height, 10);
+        this.fillRect.drawRoundedRect(0, 0, width, this.fixedHeight - 2, 10);
         this.fillRect.endFill();
     }
 }
