@@ -6,6 +6,9 @@ class Player extends PIXI.Sprite {
     #stage;
 
     constructor({ app, texture, size = 32 }) {
+        if (!app) {
+            throw new Error('Missing app reference argument');
+        }
 
         if (!texture) {
             texture = PIXI.Texture.WHITE;
