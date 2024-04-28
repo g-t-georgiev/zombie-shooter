@@ -13,7 +13,8 @@ class Healthbar extends PIXI.Container {
 
         this.backgroundRect = new PIXI.Graphics();
         this.backgroundRect.position.set(0, 0);
-        this.backgroundRect.beginFill(0x080841, 1);
+        this.backgroundRect.beginFill(0x000000, 1);
+        this.backgroundRect.lineStyle(1, 0xb91313);
         this.backgroundRect.drawRoundedRect(0, 0, this.maxWidth, this.fixedHeight, 10);
         this.backgroundRect.endFill();
 
