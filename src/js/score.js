@@ -11,12 +11,12 @@ class ScoreScreen extends PIXI.Container {
         this.#view = app.view;
         this.#stage = app.stage;
 
-        this.#score = new PIXI.Text("SCORE:  0 PTS");
+        this.#score = new PIXI.Text("SCORE: 000 PTS");
         this.#score.anchor.set(0, .5);
         this.#score.style = new PIXI.TextStyle({
-            fontFamily: "Arcade Classic",
+            fontFamily: "Press Start 2P",
             fontSize: 22,
-            fill: 0x0A0A5D
+            fill: 0xFFFFFF
         });
         const textMetrics = PIXI.TextMetrics.measureText("M", this.#score.style);
 
@@ -27,6 +27,7 @@ class ScoreScreen extends PIXI.Container {
     }
 
     update(score) {
+        score = score.toString().padStart(3, '0');
         this.#score.text = this.#score.text.replace(/\d+ PTS/, `${score} PTS`);
     }
 
@@ -35,7 +36,7 @@ class ScoreScreen extends PIXI.Container {
     }
 
     destroy() {
-        this.#score.text = this.#score.text.replace(/\d+ PTS/, `0 PTS`);
+        this.#score.text = this.#score.text.replace(/\d+ PTS/, `000 PTS`);
         this.#stage.removeChild(this);
     }
 }
