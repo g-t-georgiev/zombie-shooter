@@ -15,7 +15,7 @@ class Bullet extends PIXI.Sprite {
         if (!texture) {
             const circle = new PIXI.Graphics();
             circle.position.set(0, 0);
-            circle.beginFill(0x0000FF, 1);
+            circle.beginFill(0xFFFFFF, 1);
             circle.drawCircle(0, 0, size);
             circle.endFill();
             texture = app.renderer.generateTexture(circle);
@@ -32,10 +32,6 @@ class Bullet extends PIXI.Sprite {
         this.width = size * 2;
         this.height = size * 2;
         this.anchor.set(.5);
-        this.position.set(
-            player.position.x,
-            player.position.y
-        );
         this.speed = speed;
         this.damage = damage;
     }
@@ -65,7 +61,7 @@ class Shooter {
         this.#stage = app.stage;
         this.#player = player;
 
-        this.bulletSpeed = 8;
+        this.bulletSpeed = 15;
         this.bullets = [];
         this.bulletSize = 4;
         this.maxBulletsCount = 3;
@@ -94,31 +90,48 @@ class Shooter {
 
     #createBullet() {
         // console.log('#createBullet', this);
-        const bullet = new Bullet({ app: this.#app, player: this.#player, size: this.bulletSize, speed: this.bulletSpeed });
-        
         const directionAngle = this.#player.rotation;
-        bullet.velocity = new Victor(
-            Math.cos(directionAngle),
-            Math.sin(directionAngle)
-        ).multiplyScalar(bullet.speed);
+        const offset = {
+            x: Math.cos(directionAngle) * (this.#player.width / 2),
+            y: Math.sin(directionAngle) * (this.#player.height / 2)
+        };
+        const position = { 
+            x: this.#player.position.x + offset.x,
+            y: this.#player.position.y + offset.y 
+        };
+        const velocity = {
+            x: Math.cos(directionAngle) * this.bulletSpeed,
+            y: Math.sin(directionAngle) * this.bulletSpeed
+        }
+
+        const bullet = new Bullet({ app: this.#app, player: this.#player, size: this.bulletSize, speed: this.bulletSpeed });
+        bullet.position = position;
+        bullet.velocity = velocity;
 
         this.bullets.push(bullet);
         this.#stage.addChild(bullet);
     }
 
     update(dt) {
-        this.bullets.forEach((bullet, i) => {
+        this.bullets = this.bullets.filter(bullet => {
+            if (!bullet.visible) bullet.destroy();
+            return bullet.visible;
+        });
+        
+        this.bullets.forEach(bullet => {
+            if (!bullet.visible) {
+                bullet.destroy();
+                return;
+            }
+
             if (
                 bullet.position.x < 0 || 
                 bullet.position.x > this.#app.view.width || 
                 bullet.position.y < 0 || 
                 bullet.position.y > this.#app.view.height
             ) {
-                const timeoutId = window.setTimeout(() => {
-                    window.clearTimeout(timeoutId);
-                    this.bullets.splice(i, 1);
-                    this.#stage.removeChild(bullet);
-                }, 0);
+                bullet.visible = false;
+                bullet.destroy();
                 return;
             }
 
