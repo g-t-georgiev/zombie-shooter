@@ -12,7 +12,13 @@ class Player extends PIXI.Sprite {
         }
 
         if (!texture) {
-            texture = PIXI.Texture.WHITE;
+            const circle = new PIXI.Graphics();
+            circle.position.set(0, 0);
+            circle.beginFill(0xFFFFFF, 1);
+            circle.drawCircle(0, 0, size);
+            circle.endFill();
+            texture = app.renderer.generateTexture(circle);
+            circle.destroy();
         }
 
         super(texture);
@@ -22,7 +28,7 @@ class Player extends PIXI.Sprite {
         this.anchor.set(0.5);
         this.position.set(app.screen.width / 2, app.screen.height / 2);
         this.width = this.height = size;
-        this.tint = 0xea985d;
+        this.tint = 0xFFFFFF;
         this.visible = false;
     }
 
