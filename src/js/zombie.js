@@ -78,24 +78,43 @@ class Zombie extends PIXI.Sprite {
     }
 
     update(dt) {
-        const e = new Victor(this.position.x, this.position.y);
-        const s = new Victor(this.#player.position.x, this.#player.position.y);
+        if (!this.visible) {
+            this.kill();
+            return;
+        }
 
-        if (e.distance(s) < this.#player.width) {
+        let zHalfSize = this.width / 2;
+        let pHalfSize = this.#player.width / 2;
+        let halfSizes = zHalfSize + pHalfSize;
+
+        let dx = this.#player.position.x - this.position.x;
+        let dy = this.#player.position.y - this.position.y;
+        let distance = Math.hypot(dx, dy);
+
+        if (distance < halfSizes) {
             // let r = randomSpawnPoint();
             // this.position.set(r.x, r.y);
             this.attack();
+            return;
         }
 
-        const d = s.subtract(e);
-        const v = d.normalize().multiplyScalar(this.speed * dt);
-        this.position.set(this.position.x + v.x, this.position.y + v.y);
+        let direction = Math.atan2(
+            this.#player.position.y - this.position.y,
+            this.#player.position.x - this.position.x
+        );
+
+        this.vx = Math.cos(direction) * this.speed;
+        this.vy = Math.sin(direction) * this.speed;
+
+        this.position.x += this.vx * dt;
+        this.position.y += this.vy * dt;
     }
 }
 
 function randomSpawnPoint(canvasWidth, canvasHeight) {
     const edge = Math.floor(Math.random() * 4);
-    const point = new Victor(0, 0);
+    const point = { x: 0, y: 0 };
+
     switch (edge) {
         case 0: {
             point.x = canvasWidth * Math.random();
