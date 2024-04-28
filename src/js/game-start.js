@@ -17,13 +17,13 @@ class GameStartScreen extends PIXI.Container {
         this.height = canvasHeight;
         this.visible = false;
 
-        const text = new PIXI.Text("CLICK   TO   START");
+        const text = new PIXI.Text("CLICK TO START");
         text.anchor.set(.5, 0);
         text.position.set(canvasWidth / 2, canvasHeight * .3);
         text.style = new PIXI.TextStyle({
-            fontFamily: "Arcade Classic",
+            fontFamily: "Press Start 2P",
             fontSize: 35,
-            fill: 0x0A0A5D,
+            fill: 0xFFFFFF,
         });
 
         this.addChild(text);
