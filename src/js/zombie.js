@@ -3,7 +3,6 @@ DIRECTIONS.TOP = 'Top';
 DIRECTIONS.BOTTOM = 'Bottom';
 DIRECTIONS.LEFT = 'Left';
 DIRECTIONS.RIGHT = 'Right';
-console.log(DIRECTIONS);
 
 class Zombie extends PIXI.Sprite {
     #app;
