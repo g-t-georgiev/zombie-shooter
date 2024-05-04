@@ -1,3 +1,10 @@
+const DIRECTIONS = ['Top', 'Bottom', 'Left', 'Right'];
+DIRECTIONS.TOP = 'Top';
+DIRECTIONS.BOTTOM = 'Bottom';
+DIRECTIONS.LEFT = 'Left';
+DIRECTIONS.RIGHT = 'Right';
+console.log(DIRECTIONS);
+
 class Zombie extends PIXI.Sprite {
     #app;
     #stage;
@@ -16,10 +23,14 @@ class Zombie extends PIXI.Sprite {
 
         const r = randomSpawnPoint(app.view.width, app.view.height);
 
+        const color = randomInt(0x4040bf, 0xbf4042);
+        speed = randomInt(speed, speed + 2);
+        size = randomInt(size, size + 10);
+
         if (!texture) {
             const circle = new PIXI.Graphics();
             circle.position.set(0, 0);
-            circle.beginFill(0xFF0000, 1);
+            circle.beginFill(color, 1);
             circle.drawCircle(0, 0, size);
             circle.endFill();
             
@@ -111,34 +122,26 @@ class Zombie extends PIXI.Sprite {
     }
 }
 
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function randomSpawnPoint(canvasWidth, canvasHeight) {
-    const edge = Math.floor(Math.random() * 4);
+    const edge = DIRECTIONS[randomInt(0, DIRECTIONS.length - 1)];
     const point = { x: 0, y: 0 };
 
-    switch (edge) {
-        case 0: {
-            point.x = canvasWidth * Math.random();
-            point.y = 0;
-            break;
-        }
-        case 1: {
-            point.x = canvasWidth;
-            point.y = canvasHeight * Math.random();
-            break;
-        }
-        case 2: {
-            point.x = canvasWidth * Math.random();
-            point.y = canvasHeight;
-            break;
-        }
-        case 3: {
-            point.x = 0;
-            point.y = canvasHeight * Math.random();
-            break;
-        }
-        default: {
-            break;
-        }
+    if (edge === DIRECTIONS.TOP) {
+        point.x = canvasWidth * Math.random();
+        point.y = 0;
+    } else if (edge === DIRECTIONS.RIGHT) {
+        point.x = canvasWidth;
+        point.y = canvasHeight * Math.random();
+    } else if (edge === DIRECTIONS.BOTTOM) {
+        point.x = canvasWidth * Math.random();
+        point.y = canvasHeight;
+    } else if (edge === DIRECTIONS.LEFT) {
+        point.x = 0;
+        point.y = canvasHeight * Math.random();
     }
 
     return point;
